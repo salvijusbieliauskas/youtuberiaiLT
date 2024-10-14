@@ -4,7 +4,6 @@ using Domain.Models.Youtube;
 using Helpers.CSV;
 using Helpers.Strings;
 using Services.YoutubeAPI;
-using Helpers.Mappers;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataAccessLayer.Seed
@@ -65,12 +64,11 @@ namespace DataAccessLayer.Seed
                         {
                             continue;
                         }
-                        var channel = response.ToYoutubeChannel();
                         foreach (var category in csvChannel.Categories)
                         {
                             var newChannelCategory = new ChannelCategory()
                             {
-                                ChannelId = channel.Id,
+                                ChannelId = response.Id,
                                 CategoryName = category,
                                 CategoryNormalizedName = category.MyNormalize()
                             };
@@ -87,15 +85,15 @@ namespace DataAccessLayer.Seed
                                 await _dbContext.Categories.AddAsync(newCategory);
                                 await _dbContext.SaveChangesAsync();
                             }
-                            var existingCatInChannel = channel.Categories
+                            var existingCatInChannel = response.Categories
                                 .FirstOrDefault(c => c.CategoryName == newChannelCategory.CategoryName || c.CategoryNormalizedName == newChannelCategory.CategoryNormalizedName);
-                            if (existingCatInChannel is null && !channel.Categories.Contains(existingCatInChannel))
+                            if (existingCatInChannel is null && !response.Categories.Contains(existingCatInChannel))
                             {
-                                channel.Categories.Add(newChannelCategory);
+                                response.Categories.Add(newChannelCategory);
                             }
                         }
 
-                        channels.Add(channel);
+                        channels.Add(response);
                     }
 
 

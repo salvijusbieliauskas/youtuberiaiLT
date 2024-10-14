@@ -3,7 +3,6 @@ using Domain.Models.Youtube;
 using Google.Apis.YouTube.v3;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Helpers.Mappers;
 using Helpers.CSV;
 using Services.YoutubeAPI;
 using System.Diagnostics;
