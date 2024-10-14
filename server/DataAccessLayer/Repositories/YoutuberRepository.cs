@@ -4,7 +4,6 @@ using Domain.Enums;
 using Domain.Models;
 using Domain.Models.Youtube;
 using FluentResults;
-using Helpers.Mappers;
 using Helpers.RequestObjects;
 using Helpers.Strings;
 using Microsoft.EntityFrameworkCore;
@@ -90,12 +89,11 @@ namespace DataAccessLayer.Repositories
         public async Task<Result<YoutubeChannel>> CreateByIdAsync(string id)
         {
             
-            var channelResponse = await _ytService.getChannelById(id);
-            if (channelResponse is null)
+            var channel = await _ytService.getChannelById(id);
+            if (channel is null)
             {
                 return Result.Fail(ErrorTypes.NotFound);
             }
-            var channel = channelResponse.ToYoutubeChannel();
             var channelFromDb = await _dbContext.Channels
                  .Include(x => x.Categories)
                  .ThenInclude(x => x.Category)
@@ -194,12 +192,11 @@ namespace DataAccessLayer.Repositories
             {
                 return Result.Fail(ErrorTypes.NotFound);
             }
-            var channelResponse = await _ytService.getChannelById(id);
-            if (channelResponse is null)
+            var channel = await _ytService.getChannelById(id);
+            if (channel is null)
             {
                 return Result.Fail(ErrorTypes.NotFound);
             }
-            var channel = channelResponse.ToYoutubeChannel();
             channel = UpdateAsync(channel).Result.Value;
 
             return channel;
@@ -246,19 +243,18 @@ namespace DataAccessLayer.Repositories
                 return Result.Fail(ErrorTypes.NotFound);
             }
 
-            var channelResponse = await _ytService.getChannelById(id);
+            var channel = await _ytService.getChannelById(id);
 
-            if (channelResponse is null)
+            if (channel is null)
             {
                 return Result.Fail(ErrorTypes.NotFound);
             }
-            var updatedChannel = channelResponse.ToYoutubeChannel();
 
-            existingChannel.Thumbnail = updatedChannel.Thumbnail;
-            existingChannel.Description = updatedChannel.Description;
-            existingChannel.Title = updatedChannel.Title;
-            existingChannel.SubscriberCount = updatedChannel.SubscriberCount;
-            existingChannel.CustomUrl = updatedChannel.CustomUrl;
+            existingChannel.Thumbnail = channel.Thumbnail;
+            existingChannel.Description = channel.Description;
+            existingChannel.Title = channel.Title;
+            existingChannel.SubscriberCount = channel.SubscriberCount;
+            existingChannel.CustomUrl = channel.CustomUrl;
             existingChannel.UpdateDate();
 
             await _dbContext.SaveChangesAsync();

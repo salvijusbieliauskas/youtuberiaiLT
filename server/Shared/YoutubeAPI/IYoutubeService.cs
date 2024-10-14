@@ -1,11 +1,11 @@
-﻿using Google.Apis.YouTube.v3.Data;
+﻿using Domain.Models.Youtube;
 
 namespace Services.YoutubeAPI
 {
     public interface IYoutubeService
     {
-        Task<ChannelListResponse?> getChannelById(string channelId);
-        Task<ChannelListResponse?> getChannelByHandle(string channelHandle);
-        Task<ChannelListResponse?> getChannel(string identifier);
+        Task<YoutubeChannel?> getChannelById(string channelId);
+        Task<YoutubeChannel?> getChannelByHandle(string channelHandle);
+        Task<YoutubeChannel?> getChannel(string identifier);
     }
 }

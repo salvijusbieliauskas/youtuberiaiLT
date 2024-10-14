@@ -2,7 +2,6 @@
 using Domain.Models;
 using Domain.Models.Youtube;
 using Microsoft.EntityFrameworkCore;
-using Helpers.Mappers;
 using Helpers.CSV;
 using Services.YoutubeAPI;
 using Helpers.Strings;

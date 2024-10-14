@@ -1,72 +1,57 @@
 ﻿using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
-using Google.Apis.YouTube.v3.Data;
 using Microsoft.Extensions.Configuration;
+using Domain.Models.Youtube;
+using Services.YoutubeAPI.Helpers;
+using Services.YoutubeAPI.Helpers.Wrappers;
+using System.Diagnostics;
 
 namespace Services.YoutubeAPI
 {
     public class YoutubeService : IYoutubeService
     {
         private readonly IConfiguration _config;
-        private readonly string apiKey = string.Empty;
-        private readonly string applicationName = string.Empty;
         public YoutubeService(IConfiguration config)
         {
             _config = config;
-            apiKey = _config["GoogleAPIKey"];
-            applicationName = _config["GoogleApplicationName"];
         }
-        public async Task<ChannelListResponse?> getChannelById(string channelId)
+        public async Task<YoutubeChannel?> getChannelById(string channelId)
         {
-            var youtubeService = new YouTubeService(new BaseClientService.Initializer
+            Result<YoutubeChannel> result = await Utils.GetChannelAsync(channelId);
+            if (!result)
             {
-                ApiKey = apiKey,
-                ApplicationName = applicationName
-            });
+                Debug.WriteLine("Failed fetching channel: " + result.Message);
+                return null;
+            }
+            return result.Value;
+        }
+        public async Task<YoutubeChannel?> getChannelByHandle(string channelHandle)
+        {
+            Result<string> result = await Utils.GetChannelIdFromVanity(channelHandle);
 
-            var searchRequest = youtubeService.Channels.List(new[] { "snippet", "id", "statistics" });
-            searchRequest.Id = channelId;
-
-            var searchResponse = await searchRequest.ExecuteAsync();
-
-            if (searchResponse is null || searchResponse.PageInfo.TotalResults <= 0)
+            if (!result)
             {
+                Debug.WriteLine("Failed fetching handle: " + result.Message);
                 return null;
             }
 
-            return searchResponse;       
+            Result<YoutubeChannel> channelResult = await Utils.GetChannelAsync(result.Value);
 
-        }
-        public async Task<ChannelListResponse?> getChannelByHandle(string channelHandle)
-        {
-            var youtubeService = new YouTubeService(new BaseClientService.Initializer
+            if (!channelResult)
             {
-                ApiKey = apiKey,
-                ApplicationName = applicationName
-            });
-
-            var searchRequest = youtubeService.Channels.List(new[] { "snippet", "id", "statistics" });
-            searchRequest.ForHandle = channelHandle;
-
-            var searchResponse = await searchRequest.ExecuteAsync();
-
-            if (searchResponse is null || searchResponse.PageInfo.TotalResults <= 0)
-            {
+                Debug.WriteLine("Failed fetching channel: " + result.Message);
                 return null;
             }
 
-            return searchResponse;
+            return channelResult.Value;
         }
 
-        public async Task<ChannelListResponse?> getChannel(string identifier)
+        public async Task<YoutubeChannel?> getChannel(string identifier)
         {
-            var channelDetails = await getChannelByHandle(identifier);
-            if (channelDetails is null) 
-            {
-                channelDetails = await getChannelById(identifier);
-            }
+            if (identifier.Trim().StartsWith('@'))
+                return await getChannelByHandle(identifier);
 
-            return channelDetails;
+            return await getChannelById(identifier);
         }
     }
 }

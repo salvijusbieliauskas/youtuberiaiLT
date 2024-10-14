@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Authentication;
 using server.Auth;
 using DataAccessLayer.Seed;
 using Microsoft.EntityFrameworkCore;
-using Services.DiscordSevice;
 
 var builder = WebApplication.CreateBuilder(args);
 
